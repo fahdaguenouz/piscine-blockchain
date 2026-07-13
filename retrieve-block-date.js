@@ -16,24 +16,29 @@ function rpc(method, params = []) {
         method: "POST",
         auth: "leeloo:multipass",
         headers: {
-          "Content-Type": "application/json",
+          "Content-Type": "text/plain",
           "Content-Length": Buffer.byteLength(body),
         },
       },
       (res) => {
-        let data = "";
+        let response = "";
 
         res.on("data", (chunk) => {
-          data += chunk;
+          response += chunk;
         });
 
         res.on("end", () => {
-          const response = JSON.parse(data);
+          try {
+            const json = JSON.parse(response);
 
-          if (response.error) {
-            reject(response.error);
-          } else {
-            resolve(response.result);
+            if (json.error) {
+              reject(new Error(json.error.message));
+              return;
+            }
+
+            resolve(json.result);
+          } catch (err) {
+            reject(err);
           }
         });
       }
@@ -46,9 +51,11 @@ function rpc(method, params = []) {
 }
 
 async function retrieveBlockDate(height) {
-  const hash = await rpc("getblockhash", [height]);
-  const block = await rpc("getblock", [hash]);
-  return block.time;
+  const blockHash = await rpc("getblockhash", [Number(height)]);
+  const block = await rpc("getblock", [blockHash]);
+  return Number(block.time);
 }
 
-module.exports = { retrieveBlockDate };
+module.exports = {
+  retrieveBlockDate,
+};
