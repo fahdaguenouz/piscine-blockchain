@@ -4,7 +4,7 @@ function rpc(method, params = []) {
   return new Promise((resolve, reject) => {
     const body = JSON.stringify({
       jsonrpc: "1.0",
-      id: "1",
+      id: "curltest",
       method,
       params,
     });
@@ -21,25 +21,18 @@ function rpc(method, params = []) {
         },
       },
       (res) => {
-        let response = "";
+        let data = "";
 
-        res.on("data", (chunk) => {
-          response += chunk;
-        });
+        res.on("data", (chunk) => (data += chunk));
 
         res.on("end", () => {
-          try {
-            const json = JSON.parse(response);
+          const response = JSON.parse(data);
 
-            if (json.error) {
-              reject(new Error(json.error.message));
-              return;
-            }
-
-            resolve(json.result);
-          } catch (err) {
-            reject(err);
+          if (response.error) {
+            return reject(new Error(response.error.message));
           }
+
+          resolve(response.result);
         });
       }
     );
@@ -51,11 +44,9 @@ function rpc(method, params = []) {
 }
 
 async function retrieveBlockDate(height) {
-  const blockHash = await rpc("getblockhash", [Number(height)]);
-  const block = await rpc("getblock", [blockHash]);
-  return Number(block.time);
+  const hash = await rpc("getblockhash", [height]);
+  const block = await rpc("getblock", [hash, 1]); 
+  return block.time;
 }
 
-module.exports = {
-  retrieveBlockDate,
-};
+module.exports = { retrieveBlockDate };
