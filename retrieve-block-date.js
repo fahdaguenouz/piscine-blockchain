@@ -43,12 +43,13 @@ function rpc(method, params = []) {
 
     req.on("error", reject);
     req.write(body);
+    console.log(body);
     req.end();
   });
 }
 
 async function retrieveBlockDate(height) {
-  const hash = await rpc("getblockhash", [height]);
+const hash = await rpc("getblockhash", [Number(height)]);
   console.log("hash:", hash, typeof hash);
 
   const block = await rpc("getblock", [hash, 1]);
