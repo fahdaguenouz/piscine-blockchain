@@ -45,8 +45,11 @@ function rpc(method, params = []) {
 
 async function retrieveBlockDate(height) {
   const hash = await rpc("getblockhash", [height]);
-  const block = await rpc("getblock", [hash, 1]); 
-  return block.time;
-}
+  console.log("hash:", hash, typeof hash);
 
+  const block = await rpc("getblock", [hash, 1]);
+  console.log("block.time:", block.time, typeof block.time);
+
+  return Number(block.time);
+}
 module.exports = { retrieveBlockDate };
