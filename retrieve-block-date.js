@@ -26,10 +26,14 @@ function rpc(method, params = []) {
         res.on("data", (chunk) => (data += chunk));
 
         res.on("end", () => {
+          console.log("RAW:", data);
+
           const response = JSON.parse(data);
 
           if (response.error) {
-            return reject(new Error(response.error.message));
+            console.log("RPC ERROR:", response.error);
+            reject(new Error(JSON.stringify(response.error)));
+            return;
           }
 
           resolve(response.result);
