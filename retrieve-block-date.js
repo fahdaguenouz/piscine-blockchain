@@ -26,12 +26,12 @@ function rpc(method, params = []) {
         res.on("data", (chunk) => (data += chunk));
 
         res.on("end", () => {
-          console.log("RAW:", data);
+          // console.log("RAW:", data);
 
           const response = JSON.parse(data);
 
           if (response.error) {
-            console.log("RPC ERROR:", response.error);
+            // console.log("RPC ERROR:", response.error);
             reject(new Error(JSON.stringify(response.error)));
             return;
           }
@@ -43,16 +43,13 @@ function rpc(method, params = []) {
 
     req.on("error", reject);
     req.write(body);
-    console.log(body);
+    // console.log(body);
     req.end();
   });
 }
 
-async function retrieveBlockDate(height) {
-  console.log("height =", height, typeof height);
-
-  const hash = await rpc("getblockhash", [Number(height)]);
-  const block = await rpc("getblock", [hash, 1]);
-  return Number(block.time);
+async function retrieveBlockDate(hash) {
+  const header = await rpc("getblockheader", [hash]);
+  return Number(header.time);
 }
 module.exports = { retrieveBlockDate };
