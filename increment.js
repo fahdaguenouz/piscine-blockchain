@@ -21,5 +21,3 @@ function increment(hex) {
 
   return Buffer.from(bytes);
 }
-
-module.exports = { increment };
