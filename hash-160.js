@@ -1,6 +1,6 @@
-const crypto = require("crypto");
+import crypto from "crypto";
 
-function hash160(input) {
+export function hash160(input) {
   const ripemd = crypto
     .createHash("ripemd160")
     .update(input)
@@ -12,4 +12,4 @@ function hash160(input) {
     .digest();
 }
 
-exports.hash160 = hash160;
+export { hash160 };
