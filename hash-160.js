@@ -1,15 +1,7 @@
-const crypto = require("crypto");
+const crypto = require('crypto');
 
 function hash160(input) {
-  const ripemd = crypto
-    .createHash("ripemd160")
-    .update(input)
-    .digest();
-
-  return crypto
-    .createHash("sha256")
-    .update(ripemd)
-    .digest();
+  const ripemd160 = crypto.createHash('ripemd160').update(input).digest();
+  const sha256 = crypto.createHash('sha256').update(ripemd160).digest();
+  return sha256;
 }
-
-exports.hash160 = hash160;
