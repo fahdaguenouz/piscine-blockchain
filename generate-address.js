@@ -1,18 +1,33 @@
-const { generateKeyPairSync: g, createHash: h } = require("crypto");
-exports.generateAddress = () => {
-  const { k: p } = g("ec", {
-      namedCurve: "secp256k1",
-      privateKeyEncoding: { type: "pkcs8", format: "pem" },
-      publicKeyEncoding: { type: "spki", format: "pem" },
-    }),
-    { k: u } = g("ec", {
-      namedCurve: "secp256k1",
-      privateKeyEncoding: { type: "pkcs8", format: "pem" },
-      publicKeyEncoding: { type: "spki", format: "der" },
+const crypto = require('crypto');
+
+function generateAddress() {
+  const { privateKey, publicKey } = crypto.generateKeyPairSync('ec', {
+    namedCurve: 'secp256k1',
+    privateKeyEncoding: {
+      type: 'pkcs8',
+      format: 'pem',
+    },
+    publicKeyEncoding: {
+      type: 'spki',
+      format: 'pem',
+    },
+  });
+
+  const publicKeyDer = crypto
+    .createPublicKey(publicKey)
+    .export({
+      type: 'spki',
+      format: 'der',
     });
+
+  const hash = crypto
+    .createHash('sha256')
+    .update(publicKeyDer)
+    .digest('hex');
+
   return {
-    privateKey: p,
-    publicKey: u,
-    address: "01" + h("sha256").update(u).digest("hex"),
+    privateKey,
+    publicKey,
+    address: `01${hash}`,
   };
-};
+}
