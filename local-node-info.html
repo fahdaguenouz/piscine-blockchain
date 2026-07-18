@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Local Node Info</title>
+  </head>
+  <body>
+    <p>Network ID: <span id="chainId"></span></p>
+    <p>Current Block: <span id="blockNumber"></span></p>
+
+   <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js" type="application/javascript"></script>
+
+    <script type="module">
+      async function loadNodeInfo() {
+        try {
+          // Connect to the local Ethereum node
+          const provider = new ethers.providers.JsonRpcProvider(
+            "http://localhost:8545"
+          );
+
+          // Get the network information
+          const network = await provider.getNetwork();
+
+          // Get the latest block number
+          const blockNumber = await provider.getBlockNumber();
+
+          // Display the results
+          document.getElementById("chainId").textContent = network.chainId;
+          document.getElementById("blockNumber").textContent = blockNumber;
+        } catch (err) {
+          console.error(err);
+          document.getElementById("chainId").textContent = "Error";
+          document.getElementById("blockNumber").textContent = "Error";
+        }
+      }
+
+      loadNodeInfo();
+    </script>
+  </body>
+</html>
