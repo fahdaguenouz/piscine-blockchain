@@ -1,39 +1,28 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <title>Local Node Info</title>
-  </head>
-  <body>
-    <p>Network ID: <span id="chainId"></span></p>
-    <p>Current Block: <span id="blockNumber"></span></p>
+<head>
+  <title>Local Node Info</title>
+</head>
+<body>
 
-   <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js" type="application/javascript"></script>
+<span id="chainId"></span>
+<span id="blockNumber"></span>
 
-    <script type="module">
-      async function loadNodeInfo() {
-        try {
-          // Connect to the local Ethereum node
-          const provider = new ethers.providers.JsonRpcProvider(
-            "http://localhost:8545"
-          );
+<script src="./ethers-5.7.umd.min.js"></script>
 
-          // Get the network information
-          const network = await provider.getNetwork();
+<script>
+async function loadNodeInfo() {
+    const provider = new ethers.providers.JsonRpcProvider("http://localhost:8545");
 
-          // Get the latest block number
-          const blockNumber = await provider.getBlockNumber();
+    const network = await provider.getNetwork();
+    const blockNumber = await provider.getBlockNumber();
 
-          // Display the results
-          document.getElementById("chainId").textContent = network.chainId;
-          document.getElementById("blockNumber").textContent = blockNumber;
-        } catch (err) {
-          console.error(err);
-          document.getElementById("chainId").textContent = "Error";
-          document.getElementById("blockNumber").textContent = "Error";
-        }
-      }
+    document.getElementById("chainId").textContent = network.chainId;
+    document.getElementById("blockNumber").textContent = blockNumber;
+}
 
-      loadNodeInfo();
-    </script>
-  </body>
+loadNodeInfo();
+</script>
+
+</body>
 </html>
