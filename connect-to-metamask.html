@@ -1,74 +1,35 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
+  <head>
+    <title>Connect to MetaMask</title>
+  </head>
+  <body>
+    <div id="address"></div>
+    <div id="balance"></div>
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Connect To MetaMask</title>
-</head>
+    <script
+      src="./ethers-5.7.umd.min.js"
+      type="application/javascript"
+    ></script>
+    <!-- use the command to serve this html file in a server: python3 -m http.server 8000 -->
+    <script type="module">
+      async function main() {
+        const addressEl = document.getElementById("address");
+        const balanceEl = document.getElementById("balance");
 
-<body>
-    <!-- run in a server to connect to metamask  in local it doesnt detect eth_requestAccounts -->
-    <!-- python3 -m http.server 8000 -->
-    <h1>Connect To MetaMask</h1>
+        const provider = new ethers.providers.JsonRpcProvider(
+          "http://localhost:8545"
+        );
 
-    <button id="connect">Connect</button>
-    <button id="refresh" disabled>Refresh balance</button>
+        const wallet = ethers.Wallet.createRandom().connect(provider);
 
-    <p><strong>Address:</strong> <span id="address">Not connected</span></p>
-    <p><strong>Balance:</strong> <span id="balance">0</span></p>
+        addressEl.textContent = wallet.address;
 
-    <script src="./ethers-5.7.umd.min.js"></script>
+        const balance = await provider.getBalance(wallet.address);
+        balanceEl.textContent = ethers.utils.formatEther(balance);
+      }
 
-    <script>
-        let provider;
-        let signer;
-
-        async function connectWallet() {
-            if (typeof window.ethereum === "undefined") {
-                alert("MetaMask is not installed.");
-                return;
-            }
-
-            try {
-                await window.ethereum.request({
-                    method: "eth_requestAccounts"
-                });
-
-                provider = new ethers.providers.JsonRpcProvider("http://127.0.0.1:8545");
-                const accounts = await provider.listAccounts();
-                account = accounts[0];
-                document.getElementById("address").textContent = account;
-
-
-                document.getElementById("refresh").disabled = false;
-
-                await refreshBalance();
-            } catch (err) {
-                console.error(err);
-            }
-        }
-
-        async function refreshBalance() {
-            if (!provider || !account) {
-                return;
-            }
-
-            try {
-                const balance = await provider.getBalance(account);
-                document.getElementById("balance").textContent =
-                    ethers.utils.formatEther(balance);
-            } catch (err) {
-                console.error(err);
-            }
-        }
-
-        document.getElementById("connect")
-            .addEventListener("click", connectWallet);
-
-        document.getElementById("refresh")
-            .addEventListener("click", refreshBalance);
+      main();
     </script>
-</body>
-
+  </body>
 </html>
