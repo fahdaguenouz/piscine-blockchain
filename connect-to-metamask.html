@@ -23,7 +23,6 @@
     <script>
         let provider;
         let signer;
-        let account;
 
         async function connectWallet() {
             if (typeof window.ethereum === "undefined") {
@@ -36,11 +35,12 @@
                     method: "eth_requestAccounts"
                 });
 
-                provider = new ethers.providers.Web3Provider(window.ethereum);
-                signer = provider.getSigner();
-                account = await signer.getAddress();
-
+                provider = new ethers.providers.JsonRpcProvider("http://127.0.0.1:8545");
+                const accounts = await provider.listAccounts();
+                account = accounts[0];
                 document.getElementById("address").textContent = account;
+
+
                 document.getElementById("refresh").disabled = false;
 
                 await refreshBalance();
