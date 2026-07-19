@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connect To MetaMask</title>
+</head>
+<body>
+    <!-- run in a server to connect to metamask  in local it doesnt detect eth_requestAccounts -->
+    <!-- python3 -m http.server 8000 -->
+    <h1>Connect To MetaMask</h1>
+
+    <button id="connectBtn">Connect</button>
+    <button id="refreshBtn" disabled>Refresh balance</button>
+
+    <p><strong>Account:</strong> <span id="account">Not connected</span></p>
+    <p><strong>Balance:</strong> <span id="balance">-</span></p>
+
+   <script src="./ethers-5.7.umd.min.js"></script>
+
+    <script>
+        let provider;
+        let signer;
+        let account;
+
+        async function connectWallet() {
+            if (typeof window.ethereum === "undefined") {
+                alert("MetaMask is not installed.");
+                return;
+            }
+
+            try {
+                await window.ethereum.request({
+                    method: "eth_requestAccounts"
+                });
+
+                provider = new ethers.providers.Web3Provider(window.ethereum);
+                signer = provider.getSigner();
+                account = await signer.getAddress();
+
+                document.getElementById("account").textContent = account;
+                document.getElementById("refreshBtn").disabled = false;
+
+                await refreshBalance();
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        async function refreshBalance() {
+            if (!provider || !account) {
+                return;
+            }
+
+            try {
+                const balance = await provider.getBalance(account);
+                document.getElementById("balance").textContent =
+                    ethers.utils.formatEther(balance) + " ETH";
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        document.getElementById("connectBtn")
+            .addEventListener("click", connectWallet);
+
+        document.getElementById("refreshBtn")
+            .addEventListener("click", refreshBalance);
+    </script>
+</body>
+</html>
