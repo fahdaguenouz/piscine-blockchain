@@ -3,7 +3,12 @@ pragma solidity ^0.8.0;
 
 contract UsableToken {
     mapping(address => uint256) public accounts;
-    mapping(address => mapping(address => uint256)) public allowance;
+
+    // spender => approved amount
+    mapping(address => uint256) public allowance;
+
+    // spender => owner
+    mapping(address => address) private approvedBy;
 
     uint256 public totalSupply;
 
@@ -26,7 +31,8 @@ contract UsableToken {
     function approve(address spender, uint256 amount) public {
         require(spender != address(0), "Invalid spender");
 
-        allowance[msg.sender][spender] = amount;
+        allowance[spender] = amount;
+        approvedBy[spender] = msg.sender;
     }
 
     function transferFrom(
@@ -36,13 +42,11 @@ contract UsableToken {
     ) public {
         require(to != address(0), "Invalid recipient");
         require(amount > 0, "Amount must be greater than 0");
+        require(approvedBy[msg.sender] == from, "Not approved by owner");
+        require(allowance[msg.sender] >= amount, "Allowance exceeded");
         require(accounts[from] >= amount, "Insufficient balance");
-        require(
-            allowance[from][msg.sender] >= amount,
-            "Allowance exceeded"
-        );
 
-        allowance[from][msg.sender] -= amount;
+        allowance[msg.sender] -= amount;
         accounts[from] -= amount;
         accounts[to] += amount;
     }
