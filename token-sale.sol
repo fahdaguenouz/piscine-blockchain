@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "./MinimalToken.sol";
+import "./minimal-token.sol";
 
 contract TokenSale {
     MinimalToken public token;
