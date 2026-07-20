@@ -1,17 +1,20 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "./minimal-token.sol";
+interface IMinimalToken {
+    function balanceOf(address account) external view returns (uint);
+    function transfer(address to, uint amount) external;
+}
 
 contract TokenSale {
-    MinimalToken public token;
+    IMinimalToken public token;
     uint public tokenPrice;
     address public owner;
 
     constructor(address tokenAddress, uint price) {
         require(price > 0, "Price must be greater than 0");
 
-        token = MinimalToken(tokenAddress);
+        token = IMinimalToken(tokenAddress);
         tokenPrice = price;
         owner = msg.sender;
     }
@@ -21,11 +24,7 @@ contract TokenSale {
 
         uint amount = msg.value / tokenPrice;
         require(amount > 0, "Not enough Ether");
-
-        require(
-            token.balanceOf(address(this)) >= amount,
-            "Not enough tokens available"
-        );
+        require(token.balanceOf(address(this)) >= amount, "Not enough tokens");
 
         token.transfer(msg.sender, amount);
     }
@@ -36,7 +35,6 @@ contract TokenSale {
 
     function collect() public {
         require(msg.sender == owner, "Only owner");
-
         payable(owner).transfer(address(this).balance);
     }
 }
