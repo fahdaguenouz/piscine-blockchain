@@ -1,19 +1,40 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-interface IUsableToken {
-    function accounts(address account) external view returns (uint256);
+contract UsableToken {
+    mapping(address => uint256) public accounts;
+    mapping(address => mapping(address => uint256)) public allowance;
 
-    function allowance(address owner, address spender)
-        external
-        view
-        returns (uint256);
+    constructor(uint256 initialSupply) {
+        accounts[msg.sender] = initialSupply;
+    }
+
+    function transfer(address to, uint256 amount) public {
+        require(accounts[msg.sender] >= amount, "Insufficient balance");
+
+        accounts[msg.sender] -= amount;
+        accounts[to] += amount;
+    }
+
+    function approve(address spender, uint256 amount) public {
+        allowance[msg.sender][spender] = amount;
+    }
 
     function transferFrom(
         address from,
         address to,
         uint256 amount
-    ) external;
+    ) public {
+        require(accounts[from] >= amount, "Insufficient balance");
+        require(
+            allowance[from][msg.sender] >= amount,
+            "Allowance exceeded"
+        );
+
+        allowance[from][msg.sender] -= amount;
+        accounts[from] -= amount;
+        accounts[to] += amount;
+    }
 }
 
 contract BasicSwap {
@@ -21,9 +42,6 @@ contract BasicSwap {
     address public user2;
 
     constructor(address _user1, address _user2) {
-        require(_user1 != address(0), "Invalid user1");
-        require(_user2 != address(0), "Invalid user2");
-
         user1 = _user1;
         user2 = _user2;
     }
@@ -34,24 +52,21 @@ contract BasicSwap {
         address tokenB,
         uint256 amountB
     ) public {
-        IUsableToken tA = IUsableToken(tokenA);
-        IUsableToken tB = IUsableToken(tokenB);
+        UsableToken tA = UsableToken(tokenA);
+        UsableToken tB = UsableToken(tokenB);
 
-        // Check balances
-        require(tA.accounts(user1) >= amountA, "User1 insufficient balance");
-        require(tB.accounts(user2) >= amountB, "User2 insufficient balance");
+        require(tA.accounts(user1) >= amountA, "User1 balance");
+        require(tB.accounts(user2) >= amountB, "User2 balance");
 
-        // Check allowances
         require(
             tA.allowance(user1, address(this)) >= amountA,
-            "User1 allowance too low"
+            "User1 allowance"
         );
         require(
             tB.allowance(user2, address(this)) >= amountB,
-            "User2 allowance too low"
+            "User2 allowance"
         );
 
-        // Atomic swap
         tA.transferFrom(user1, user2, amountA);
         tB.transferFrom(user2, user1, amountB);
     }
