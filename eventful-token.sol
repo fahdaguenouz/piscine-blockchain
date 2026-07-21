@@ -18,11 +18,12 @@ contract EventfulToken {
     );
 
     constructor(uint256 initialSupply) {
-        require(initialSupply > 0, "Initial supply must be greater than 0");
-
         owner = msg.sender;
         totalSupply = initialSupply;
         balances[msg.sender] = initialSupply;
+
+        // Emit mint event for the initial supply
+        emit Minting(msg.sender, initialSupply);
     }
 
     function balanceOf(address account) public view returns (uint256) {
@@ -30,8 +31,6 @@ contract EventfulToken {
     }
 
     function transfer(address to, uint256 amount) public {
-        require(to != address(0), "Invalid recipient");
-        require(amount > 0, "Amount must be greater than 0");
         require(balances[msg.sender] >= amount, "Insufficient balance");
 
         balances[msg.sender] -= amount;
@@ -42,8 +41,6 @@ contract EventfulToken {
 
     function mint(address to, uint256 amount) public {
         require(msg.sender == owner, "Only owner");
-        require(to != address(0), "Invalid recipient");
-        require(amount > 0, "Amount must be greater than 0");
 
         balances[to] += amount;
         totalSupply += amount;
